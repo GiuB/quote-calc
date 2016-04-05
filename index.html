@@ -1,0 +1,77 @@
+<input id="importo" name="importo" value="" /><label for="importo">importo</label><br>
+<input id="rate" name="rate" value="" /><label for="rate">rate mesili</label><br>
+<input id="tan" name="tan" value="" /><label for="tan">tan</label><br>
+<input id="spese_istruttoria" name="spese_istruttoria" value="" /><label for="spese_istruttoria">spese_istruttoria</label><br>
+<input id="spese_incasso_rata" name="spese_incasso_rata" value="" /><label for="spese_incasso_rata">spese_incasso_rata</label><br>
+<input id="spese_estratto_conto" name="spese_estratto_conto" value="" /><label for="spese_estratto_conto">spese_estratto_conto</label><br>
+<input id="tasso_assicurazione" name="tasso_assicurazione" value="" /><label for="tasso_assicurazione">tasso_assicurazione</label><br>
+
+<button id="calc">Calcola</button>
+
+<h1>Rata:</h1><span id="rata"><span id="rata-val">0.0</span> &euro;</span>
+<h2>Taeg:</h2><span id="taeg"><span id="taeg-val">0.0</span> %</span>
+
+<style>
+	#rata {
+		background: grey;
+		color: white;
+		font-size: 30px;
+		padding: 7px 10px;
+	}
+	#taeg {
+		background: green;
+		color: white;
+		font-size: 20px;
+		padding: 7px 10px;
+	}
+</style>
+
+<script src="https://code.jquery.com/jquery-2.2.2.min.js"></script>
+<script>
+	jQuery(document).ready(function($) {
+		var def = {
+			importo: 1500,
+			rate: 72,
+			tan: 9.38,
+			spese_istruttoria: 150,
+			spese_incasso_rata: 1.5,
+			spese_estratto_conto: 1,
+			tasso_assicurazione: 7.15
+		};
+		$.each(def, function(k, v) {
+			$("#" + k).val(v);
+		});
+	});
+</script>
+<script>
+	function quote_calc() {
+		var importo = + $("#importo").val(),
+			rate = + $("#rate").val(),
+			tan = + $("#tan").val() / 100,
+			spese_istruttoria = + $("#spese_istruttoria").val(),
+			spese_incasso_rata = + $("#spese_incasso_rata").val(),
+			spese_estratto_conto = + $("#spese_estratto_conto").val() * Math.floor(rate / 12) / rate,
+			tasso_assicurazione = + $("#tasso_assicurazione").val() / 100;
+
+		//http://aiutomutuo.finanza.com/2012/10/01/il-piano-di-ammortamento-alla-francese-come-calcolarlo/
+		//http://www.calcoloratamutuo.org/
+		//http://www.zonaprestiti.com/guida/debitoresiduo.htm
+		var i = tan / 12;
+		var amm = (1 + (1 / (Math.pow(1 + i, rate) - 1))) * i * importo;
+		var assicurazione = (importo + spese_istruttoria) / rate * tasso_assicurazione;
+		var rata = amm + spese_incasso_rata + assicurazione + spese_estratto_conto;
+
+		var quote_taeg = importo *
+            Math.pow(1 + tan / rate, rate) *
+            (tan / rate / (Math.pow(1+ tan / rate, rate) -1));
+
+       	var taeg = (rata / quote_taeg) * tan * 100;
+
+		$("#rata-val").text(rata.toFixed(2));
+		$("#taeg-val").text(taeg.toFixed(2));
+	}
+
+	jQuery(document).ready(function($) {
+		$("#calc").click(function() { quote_calc(); });
+	});
+</script>
